@@ -135,7 +135,7 @@ const SIZE_SETS = { clothes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'], shoes: [
 const A = { view: 'dash', cats: [], products: [], orders: [], settings: {}, stats: null, pendingSeen: null, orderFilter: 'all' };
 
 /* ---------------------------- layout --------------------------- */
-const NAV = [['dash', 'Boshqaruv paneli', I.dash], ['orders', 'Buyurtmalar', I.orders], ['products', 'Mahsulotlar', I.prod], ['cats', 'Kategoriyalar', I.cat], ['users', 'Foydalanuvchilar', I.users], ['media', 'Media', I.media], ['ai', 'AI yordamchi', '<span class="msi nav-ai">auto_awesome</span>'], ['settings', 'Sozlamalar', I.set]];
+const NAV = [['dash', 'Boshqaruv paneli', I.dash], ['orders', 'Buyurtmalar', I.orders], ['products', 'Mahsulotlar', I.prod], ['cats', 'Kategoriyalar', I.cat], ['users', 'Foydalanuvchilar', I.users], ['media', 'Media', I.media], ['ai', 'AI yordamchi', '<span class="msi nav-ai">auto_awesome</span>'], ['design', 'Sayt rangi', '<span class="msi nav-ai">palette</span>'], ['settings', 'Sozlamalar', I.set]];
 function shell() {
   $('#root').innerHTML = `<div class="a-wrap">
     <aside class="a-side" id="side">
@@ -155,6 +155,7 @@ function shell() {
   $$('.a-top svg, .a-side svg').forEach((s) => s.setAttribute('stroke-linecap', 'round'));
 }
 function go(v) {
+  if (A.view === 'design' && v !== 'design') window.GH_APPLY_THEME?.(A.savedTheme || null);
   A.view = v; const keep = !A.booted ? location.search : ''; A.booted = true; history.replaceState({}, '', '/admin' + (v === 'dash' ? '' : '/' + v) + keep);
   $$('.a-nav button').forEach((b) => b.classList.toggle('active', b.dataset.v === v));
   $('#vTitle').textContent = NAV.find((n) => n[0] === v)?.[1] || '';
@@ -645,6 +646,65 @@ function updateLive(s) {
 async function refreshCounts() { try { updateLive(await api('/api/admin/stats')); } catch {} }
 
 
+
+/* ------------------------ sayt rangi (mavzu) ------------------------ */
+const THEMES = [
+  { id: 'gold', name: 'Oltin (klassik)', gold: '#c9a24e', gold2: '#ead49c', gold3: '#8d6a2a', bg: '#0a0a0b', bg2: '#111113', card: '#161618', card2: '#1c1c1f' },
+  { id: 'champagne', name: 'Shampan', gold: '#d8b98a', gold2: '#f3e3c6', gold3: '#9a7b4f', bg: '#0c0b0a', bg2: '#13110f', card: '#191714', card2: '#201d19' },
+  { id: 'rose', name: 'Pushti oltin', gold: '#d49a8a', gold2: '#f2cfc4', gold3: '#9a5f50', bg: '#0d0a0a', bg2: '#140f0f', card: '#1b1414', card2: '#221a1a' },
+  { id: 'silver', name: 'Kumush', gold: '#b9c2cf', gold2: '#e6ebf2', gold3: '#7d8796', bg: '#0a0b0d', bg2: '#101215', card: '#16191d', card2: '#1c2025' },
+  { id: 'emerald', name: 'Zumrad', gold: '#3fb489', gold2: '#a6e8cd', gold3: '#23715a', bg: '#08100d', bg2: '#0d1612', card: '#131d18', card2: '#18241f' },
+  { id: 'sapphire', name: 'Safir', gold: '#5b8def', gold2: '#b9cffb', gold3: '#3459a8', bg: '#080b12', bg2: '#0d1119', card: '#131826', card2: '#181e2e' },
+  { id: 'bordo', name: 'Bordo', gold: '#c0485e', gold2: '#efb3bf', gold3: '#7f2537', bg: '#0f090a', bg2: '#160d0f', card: '#1e1215', card2: '#26171b' },
+  { id: 'royal', name: 'Qirollik binafsha', gold: '#9d7be0', gold2: '#d8c9f7', gold3: '#5f43a3', bg: '#0b0912', bg2: '#110e1a', card: '#181424', card2: '#1e192d' },
+  { id: 'copper', name: 'Mis', gold: '#c87a46', gold2: '#f0c19f', gold3: '#86471f', bg: '#0e0a08', bg2: '#15100c', card: '#1d1611', card2: '#251c16' },
+];
+const hx = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const toHex = (a) => '#' + a.map((x) => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join('');
+const mix = (a, b, t) => toHex(hx(a).map((x, i) => x + (hx(b)[i] - x) * t));
+function themeFrom(accent, bgBase) {
+  const bg = bgBase || mix('#0a0a0b', accent, 0.04);
+  return { gold: accent, gold2: mix(accent, '#ffffff', 0.55), gold3: mix(accent, '#000000', 0.38), bg, bg2: mix(bg, '#ffffff', 0.03), card: mix(bg, accent, 0.05) === bg ? mix(bg, '#ffffff', 0.05) : mix(mix(bg, '#ffffff', 0.05), accent, 0.03), card2: mix(mix(bg, '#ffffff', 0.08), accent, 0.04) };
+}
+V.design = async (el) => {
+  const st = await api('/api/settings'); A.savedTheme = st.themeVars;
+  let cur = st.themeVars ? { ...st.themeVars } : { ...THEMES[0] }; let preset = st.themePreset || (st.themeVars ? 'custom' : 'gold');
+  const draw = () => {
+    el.innerHTML = `<div class="dz">
+      <div class="card dz-hero"><div class="dz-h"><div class="aia-orb"><span class="msi fill">palette</span></div><div><h2>Sayt rangi</h2><p class="muted">Tanlagan rangingiz butun saytga — barcha mijozlar uchun qoʻllanadi. Faqat admin oʻzgartira oladi.</p></div></div></div>
+      <div class="card"><div class="card-h"><h3>Tayyor ranglar</h3></div>
+        <div class="dz-grid">${THEMES.map((t) => `<button class="dz-th ${preset === t.id ? 'on' : ''}" data-th="${t.id}" style="--a:${t.gold};--a2:${t.gold2};--b:${t.bg};--c:${t.card}">
+          <div class="dz-pv"><i class="dz-bar"></i><i class="dz-t1"></i><i class="dz-t2"></i><i class="dz-btn"></i><i class="dz-card"></i></div>
+          <div class="dz-nm"><span class="dz-dots"><b style="background:${t.gold}"></b><b style="background:${t.gold2}"></b><b style="background:${t.bg}"></b></span>${h(t.name)}${preset === t.id ? '<span class="msi fill">check_circle</span>' : ''}</div></button>`).join('')}</div></div>
+      <div class="card"><div class="card-h"><h3>Oʻz rangingizni tanlang</h3>${preset === 'custom' ? '<span class="status st-confirmed">Tanlangan</span>' : ''}</div>
+        <div class="dz-custom">
+          <label class="dz-pick"><input type="color" id="cAcc" value="${cur.gold}"><span><b>Asosiy rang</b><small>tugmalar, sarlavhalar, belgilar</small></span></label>
+          <label class="dz-pick"><input type="color" id="cBg" value="${cur.bg}"><span><b>Fon rangi</b><small>tun rejimidagi orqa fon</small></span></label>
+          <div class="dz-fine">${['gold', 'gold2', 'gold3', 'card'].map((k) => `<label><input type="color" data-k="${k}" value="${cur[k] || '#000000'}"><small>${{ gold: 'Asosiy', gold2: 'Ochiq', gold3: 'Toʻq', card: 'Karta' }[k]}</small></label>`).join('')}</div>
+        </div></div>
+      <div class="card dz-live"><div class="card-h"><h3>Jonli koʻrinish</h3></div>
+        <div class="dz-demo"><div class="dz-d-hero"><small>ERKAKLAR UCHUN PREMIUM KIYIMLAR</small><h1>Haqiqiy janoblar <em>uchun</em></h1><div><span class="btn btn-gold">Kolleksiyani koʻrish</span><span class="btn btn-ghost">Bogʻlanish</span></div></div>
+          <div class="dz-d-card"><span class="msi">checkroom</span><b>Klassik kostyum</b><span class="gold">1 250 000 soʻm</span></div></div></div>
+      <div class="dz-save"><button class="btn btn-dark" id="dzReset"><span class="msi">restart_alt</span> Asl holiga</button><button class="btn btn-gold" id="dzSave"><span class="msi">save</span> Saqlash — saytga qoʻllash</button></div>
+    </div>`;
+    window.GH_APPLY_THEME(cur, true);
+    $$('[data-th]').forEach((b) => (b.onclick = () => { const t = THEMES.find((x) => x.id === b.dataset.th); cur = { ...t }; delete cur.id; delete cur.name; preset = t.id; draw(); }));
+    $('#cAcc').oninput = (e) => { cur = themeFrom(e.target.value, cur.bg); preset = 'custom'; window.GH_APPLY_THEME(cur, true); };
+    $('#cAcc').onchange = () => draw();
+    $('#cBg').oninput = (e) => { const t = themeFrom(cur.gold, e.target.value); cur = { ...cur, bg: t.bg, bg2: t.bg2, card: t.card, card2: t.card2 }; preset = 'custom'; window.GH_APPLY_THEME(cur, true); };
+    $('#cBg').onchange = () => draw();
+    $$('[data-k]').forEach((i) => (i.oninput = () => { cur[i.dataset.k] = i.value; preset = 'custom'; window.GH_APPLY_THEME(cur, true); }));
+    $('#dzReset').onclick = () => { cur = { ...THEMES[0] }; delete cur.id; delete cur.name; preset = 'gold'; draw(); };
+    $('#dzSave').onclick = async (e) => {
+      const b = e.currentTarget; loading(b, true);
+      try { const v = { gold: cur.gold, gold2: cur.gold2, gold3: cur.gold3, bg: cur.bg, bg2: cur.bg2, card: cur.card, card2: cur.card2 }; await api('/api/admin/settings', { method: 'PUT', body: { themeVars: v, themePreset: preset } }); window.GH_APPLY_THEME(v); A.savedTheme = v; toast('Rang saqlandi — sayt endi shu rangda ✓'); }
+      catch (err) { toast(err.message, 'err'); }
+      loading(b, false);
+    };
+  };
+  draw();
+};
+
 /* ------------------------ onlayn panel ------------------------ */
 async function onlinePanel() {
   let pn = $('#onPanel');
@@ -687,6 +747,7 @@ async function drawHealth(run = false) {
   try { const me = await api('/api/me'); if (me.role !== 'admin') { location.href = '/kirish'; return; } }
   catch { location.href = '/kirish'; return; }
   shell();
+  api('/api/settings').then((st) => { A.hosting = st.hosting || 'local'; window.GH_APPLY_THEME?.(st.themeVars); }).catch(() => {});
   const v = location.pathname.split('/')[2];
   go(V[v] ? v : 'dash');
   refreshCounts(); setInterval(refreshCounts, 8000);

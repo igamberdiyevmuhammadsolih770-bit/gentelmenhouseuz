@@ -254,6 +254,7 @@ pages.home = async (app) => {
       <div class="hero-cta fade-up d2"><a href="/katalog" data-link class="btn btn-gold">Kolleksiyani koʻrish ${I.arrow}</a><a href="/aloqa" data-link class="btn btn-ghost"><span class="msi">support_agent</span> Bogʻlanish</a></div>
       <div class="hero-stats fade-up d3"><div><b data-count="${S.cats.length}">0</b><span>Kategoriya</span></div><div><b data-count="100">0</b><span>% sifat kafolati</span></div><div><b data-count="24">0</b><span>soatda yetkazish</span></div></div>
     </div></div>
+    <div class="hero-scroll" aria-hidden="true"></div>
   </section>
   <div class="marquee"><div class="marquee-track">${Array(4).fill(`<span>${h(s.marquee || '')}</span>`).join('')}</div></div>
   <section class="sec"><div class="container">
@@ -1061,7 +1062,7 @@ async function boot() {
   plStep(15);
   try {
     const [settings, cats] = await Promise.all([api('/api/settings'), api('/api/categories')]);
-    S.settings = settings; S.cats = cats; plStep(45);
+    S.settings = settings; S.cats = cats; plStep(45); window.GH_APPLY_THEME?.(settings.themeVars);
   } catch (e) { toast('Serverga ulanib boʻlmadi', 'err'); }
   if (S.token) {
     try { const me = await api('/api/me'); S.role = me.role; S.user = me.user || null; } catch { setSession(null); }

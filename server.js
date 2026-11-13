@@ -843,6 +843,32 @@ route('POST', '/api/client-error', ({ body, req }) => {
   reportIssue('client', msg, `Sahifa: ${clean(body.page, 200)}\nFayl: ${clean(body.src, 200)}:${+body.line || 0}\n${clean(body.stack, 600)}\nBrauzer: ${clean(req.headers['user-agent'], 160)}`, { key: 'client:' + msg.slice(0, 80) }).catch(() => {});
   return { ok: true };
 });
+// botlarni chiroyli bezash: nom, tavsif, buyruqlar, rasm
+route('POST', '/api/admin/bots/brand', async () => {
+  const s = db.settings, out = {};
+  const site = s.siteName || 'Gentleman House';
+  const jobs = [];
+  if (s.botToken) jobs.push(['main', tg, {
+    name: `${site} • Savdo`,
+    short: `🎩 ${site} — premium erkaklar kiyimlari. Buyurtmalar, toʻlovlar va savdo boshqaruvi.`,
+    desc: `🎩 ${site.toUpperCase()}\nPremium erkaklar kiyimlari doʻkoni\n\n🛍 Yangi buyurtmalar — rasmlari, razmer, telefon va lokatsiya bilan\n💳 Toʻlov cheklari + 🤖 AI tekshiruvi\n✅ Bir bosishda tasdiqlash yoki rad etish\n📊 Savdo statistikasi\n\n🔐 Admin ulanishi: /admin <parol>`,
+    cmds: [['stat', '📊 Savdo statistikasi'], ['kutilmoqda', '⏳ Tasdiqlanmagan buyurtmalar'], ['admin', '🔐 Admin sifatida ulanish'], ['chiqish', '🚪 Bildirishnomalarni oʻchirish']],
+  }]);
+  if (s.monitorBotToken) jobs.push(['mon', mtg, {
+    name: `${site} • Texnik`,
+    short: `🛡 ${site} saytining texnik monitoringi: xatolar, tashriflar va tizim holati.`,
+    desc: `🛡 ${site.toUpperCase()} — MONITORING\n\n🚨 Texnik nosozliklar (AI tushuntirishi bilan)\n👤 Saytga kim kirdi va qaysi telefondan\n🔐 Roʻyxatdan oʻtish va kirishlar\n🩺 Server, bot, baza va AI holati\n\n🔐 Ulanish: /admin <parol>`,
+    cmds: [['onlayn', '🟢 Hozir saytda kim bor'], ['holat', '🩺 Tizim holati'], ['admin', '🔐 Admin sifatida ulanish']],
+  }]);
+  for (const [key, call, b] of jobs) {
+    const r = {};
+    for (const [m, p] of [['setMyName', { name: b.name }], ['setMyShortDescription', { short_description: b.short }], ['setMyDescription', { description: b.desc }], ['setMyCommands', { commands: b.cmds.map(([command, description]) => ({ command, description })) }]]) {
+      try { await call(m, p); r[m] = 'ok'; } catch (e) { r[m] = e.message; }
+    }
+    out[key] = r;
+  }
+  return out;
+}, { auth: 'admin' });
 route('POST', '/api/admin/monbot/test', async () => {
   if (!db.settings.monitorBotToken) throw httpErr(400, 'Monitoring bot tokenini kiriting va saqlang');
   let ok = 0, err = '';
@@ -934,6 +960,10 @@ route('PUT', '/api/admin/settings', ({ body }) => {
   if (Array.isArray(body.heroBgs)) s.heroBgs = body.heroBgs.map((x) => clean(x, 500)).filter((x) => /^(\/uploads\/|\/img\/|https:\/\/)/.test(x)).slice(0, 8);
   if (body.aiCheck !== undefined) s.aiCheck = !!body.aiCheck;
   if (body.aiChat !== undefined) s.aiChat = !!body.aiChat;
+  if (body.themeVars && typeof body.themeVars === 'object') {
+    const tv = {}; for (const k of ['gold', 'gold2', 'gold3', 'bg', 'bg2', 'card', 'card2']) { const v = String(body.themeVars[k] || ''); if (/^#[0-9a-f]{6}$/i.test(v)) tv[k] = v.toLowerCase(); }
+    s.themeVars = Object.keys(tv).length ? tv : null; s.themePreset = clean(body.themePreset || 'custom', 30);
+  }
   if (body.monitorVisits !== undefined) s.monitorVisits = !!body.monitorVisits;
   if (body.lat !== undefined && isFinite(+body.lat)) s.lat = +body.lat;
   if (body.lng !== undefined && isFinite(+body.lng)) s.lng = +body.lng;
