@@ -14,7 +14,8 @@ Maʼlumotlar `data/` papkasida saqlanadi (GitHub'ga yuklanmaydi).
 ### 2. Vercel'da (internetda)
 Vercel serverless boʻlgani uchun:
 - **baza** — Upstash Redis (`KV_REST_API_URL`, `KV_REST_API_TOKEN`)
-- **rasmlar, videolar, cheklar** — Vercel Blob (`BLOB_READ_WRITE_TOKEN`)
+- **rasmlar, videolar, cheklar** — Google Drive (admin panelda ulanadi); Drive ulanmagan boʻlsa — Vercel Blob (`BLOB_READ_WRITE_TOKEN`)
+- **baza nusxasi** — Google Drive `GentlemanHouse/db.json` (har oʻzgarishda + kunlik)
 - **Telegram botlar** — webhook orqali (avtomatik sozlanadi)
 - **tizim tekshiruvi** — admin panel ochilganda + har kuni (Vercel Cron)
 
@@ -22,5 +23,7 @@ Sozlash:
 1. Vercel → *Add New Project* → shu GitHub repo'ni import qiling (Framework: **Other**).
 2. *Storage* boʻlimida **Blob** va **Upstash for Redis** yarating va loyihaga ulang (env oʻzgaruvchilar avtomatik qoʻshiladi).
 3. *Redeploy* qiling. Admin: `/admin` (login va parol lokaldagi bilan bir xil boʻladi, agar baza koʻchirilgan boʻlsa).
+
+Sayt rangini admin panel → **Sayt rangi** boʻlimida oʻzgartirish mumkin.
 
 Maxfiy maʼlumotlar (bot tokenlari, Gemini kaliti, Google sozlamalari) kodda emas — admin panel → Sozlamalar orqali kiritiladi va bazada saqlanadi.
