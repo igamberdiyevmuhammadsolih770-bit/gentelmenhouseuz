@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 — Sahifa topilmadi | Gentleman House</title>
+<link rel="icon" href="/img/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/img/logo-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/img/logo-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  body{overflow:hidden}
+  .nf{min-height:100vh}
+  .nf canvas{position:absolute;inset:0;z-index:-1}
+  .lines{position:absolute;inset:0;z-index:-1;background:repeating-linear-gradient(115deg,transparent 0 80px,rgba(201,162,78,.035) 80px 81px)}
+  .nf .big{opacity:0;animation:in404 1.2s var(--ease) .1s forwards,float 5s ease-in-out 1.3s infinite}
+  .nf h2,.nf p,.nf .btns{opacity:0;animation:fadeUp .9s var(--ease) forwards}
+  .nf h2{animation-delay:.4s}.nf p{animation-delay:.55s}.nf .btns{animation-delay:.7s}
+  @keyframes in404{from{opacity:0;transform:translateY(40px) scale(.9);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .logo{position:absolute;top:26px;left:50%;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="nf">
+  <div class="lines"></div><canvas id="c"></canvas>
+  <a href="/" class="logo"><div class="logo-mark"><img src="/img/logo-96.png" alt="GH"></div><div class="logo-text">Gentleman House<small>PREMIUM MENSWEAR</small></div></a>
+  <div>
+    <div class="big">404</div>
+    <h2>Sahifa topilmadi</h2>
+    <p>Iltimos, toʻgʻri sahifaga oʻting.<br>Siz kiritgan manzil notoʻgʻri yoki bu sahifa mavjud emas.</p>
+    <div class="btns" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="/" class="btn btn-gold">Bosh sahifaga qaytish <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a href="/katalog" class="btn btn-ghost">Katalog</a>
+    </div>
+  </div>
+</div>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');let W,H;const r=()=>{W=c.width=innerWidth;H=c.height=innerHeight};r();onresize=r;
+const p=Array.from({length:70},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,s:Math.random()*1.8+.3,v:Math.random()*.4+.1,a:Math.random()}));
+(function l(){x.clearRect(0,0,W,H);for(const o of p){o.y-=o.v;if(o.y<0){o.y=H;o.x=Math.random()*W}x.beginPath();x.arc(o.x,o.y,o.s,0,7);x.fillStyle=`rgba(234,212,156,${o.a*.7})`;x.fill()}requestAnimationFrame(l)})();
+</script>
+</body>
+</html>

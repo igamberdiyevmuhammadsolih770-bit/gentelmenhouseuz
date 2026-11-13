@@ -1,0 +1,6 @@
+node_modules/
+data/
+*.log
+.vercel
+.env*
+start.local.bat

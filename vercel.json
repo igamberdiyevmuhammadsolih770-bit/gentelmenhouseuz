@@ -1,0 +1,23 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "npm install",
+  "outputDirectory": "public",
+  "functions": {
+    "api/index.js": { "maxDuration": 60, "memory": 1024 }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/uploads/(.*)", "destination": "/api/index" },
+    { "source": "/files/(.*)", "destination": "/api/index" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/(.*)", "destination": "/admin.html" },
+    { "source": "/(katalog|katalog/.*|mahsulot/.*|savat|buyurtma|kirish|royxatdan-otish|profil|aloqa|videolar|kiyib-korish)", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/(.*)\\.(js|css|html)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+    { "source": "/img/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] }
+  ],
+  "crons": [{ "path": "/api/cron/health", "schedule": "0 6 * * *" }]
+}
